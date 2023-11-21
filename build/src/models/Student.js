@@ -9,27 +9,35 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Users = void 0;
+exports.Student = void 0;
 const typeorm_1 = require("typeorm");
-let Users = class Users {
+let Student = class Student {
 };
-exports.Users = Users;
+exports.Student = Student;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)(),
-    __metadata("design:type", Number)
-], Users.prototype, "id", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.PrimaryColumn)(),
     __metadata("design:type", String)
-], Users.prototype, "firstName", void 0);
+], Student.prototype, "studentID", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ default: "" }),
     __metadata("design:type", String)
-], Users.prototype, "lastName", void 0);
+], Student.prototype, "studentName", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", Number)
-], Users.prototype, "age", void 0);
-exports.Users = Users = __decorate([
+    (0, typeorm_1.Column)({ default: "" }),
+    __metadata("design:type", String)
+], Student.prototype, "studentHashedPassword", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: "" }),
+    __metadata("design:type", String)
+], Student.prototype, "studentEmail", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: "" }),
+    __metadata("design:type", String)
+], Student.prototype, "hashedOTP", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], Student.prototype, "active", void 0);
+exports.Student = Student = __decorate([
     (0, typeorm_1.Entity)()
-], Users);
+], Student);

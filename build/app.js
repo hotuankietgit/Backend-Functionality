@@ -4,15 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const routes_1 = require("./src/routes");
 const db_config_1 = __importDefault(require("./src/config/db.config"));
+const body_parser_1 = __importDefault(require("body-parser"));
+const StudentRouter_1 = __importDefault(require("./src/routes/StudentRouter"));
 const app = (0, express_1.default)();
-const PORT = 8012;
 (0, db_config_1.default)();
-app.use('/', routes_1.router);
-app.get('/mytest', (req, res) => {
-    res.json({ data: "A done" });
-});
-app.listen(PORT, () => {
-    console.log(`Server is running on ${PORT}`);
-});
+app.use(body_parser_1.default.urlencoded({ extended: true }));
+app.use(express_1.default.json());
+app.use("/api/student", StudentRouter_1.default);
+app.listen(8080, () => console.log("Hello"));
