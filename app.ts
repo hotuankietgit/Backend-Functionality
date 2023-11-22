@@ -1,18 +1,12 @@
-import  express, {Request, Response} from "express";
-import {router} from './src/routes';
+import express, {Request, Response} from "express";
 import DB from './src/config/db.config';
-
-
+import bodyParser from "body-parser";
+import StudentRouter from "./src/routes/StudentRouter";
 
 const app = express();
-const PORT = 8012;
-
 DB();
-app.use('/',router);
-app.get('/mytest', (req: Request, res: Response) => {
-    res.json({data:"A done"})
-})
+app.use(bodyParser.urlencoded({extended:true}))
+app.use(express.json());
+app.use("/api/student", StudentRouter)
 
-app.listen(PORT,():void => {
-    console.log(`Server is running on ${PORT}`);
-})
+app.listen(8080, () => console.log("Hello"))
