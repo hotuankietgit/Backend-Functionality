@@ -22,9 +22,15 @@ class StudentController{
             const email = req.body.email;
             const password = req.body.password;
             const username = req.body.username;
-            console.log(email)
-            console.log(password)
-            console.log(username)
+
+            //Check information
+            let studentRequest = AppDataSource.getRepository(Student);
+            let studentCheck = await studentRequest.findOneBy({studentID: username, studentEmail: email})
+            if (studentCheck.active){
+                return res.status(500).json({ message: "Account's already been activated" })
+            }else if (studentCheck == null){
+                return res.status(500).json({message: "Username must be your student's id"})
+            }
             //Create OTP and hash OTP, password
             const OTP = otpGenerator.generate(6, { digits: true, upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false});
             const salt = await bcrypt.genSalt(10)
@@ -32,7 +38,6 @@ class StudentController{
             const hashPassword = await bcrypt.hash(password, salt)
 
             //Insert into database password and OTP
-            let studentRequest = AppDataSource.getRepository(Student);
             let studentTarget = await studentRequest.findOneBy({studentEmail: email})
             studentTarget.hashedOTP = hashOTP
             studentTarget.studentHashedPassword = hashPassword
@@ -69,18 +74,24 @@ class StudentController{
     }
 
     verifyRegister = async (req,res) => {
-        //Get information (email, OTP)
-        const email = req.body.email;
-        const OTP = req.body.OTP;
+        try{
+            //Get information (email, OTP)
+            const email = req.body.email;
+            const OTP = req.body.OTP;
 
-        //Verify OTP
-        let studentRequest = AppDataSource.getRepository(Student);
-        let studentTarget = await studentRequest.findOneBy({studentEmail: email})
-        let hashOTP = studentTarget.hashedOTP;
-        let result = await bcrypt.compare(OTP, hashOTP);
-        if (result){
-            res.status(200).json({ message: 'OTP is valid' })
-        }else{
+            //Verify OTP
+            let studentRequest = AppDataSource.getRepository(Student);
+            let studentTarget = await studentRequest.findOneBy({studentEmail: email})
+            let hashOTP = studentTarget.hashedOTP;
+            let result = await bcrypt.compare(OTP, hashOTP);
+            if (result){
+                res.status(200).json({ message: 'OTP is valid' })
+                studentTarget.active = true
+                studentRequest.save(studentTarget)
+            }else{
+                res.status(402).json({ message: 'OTP is not valid' })
+            }
+        }catch{
             res.status(500).json({ message: 'OTP is not valid' })
         }
     }
