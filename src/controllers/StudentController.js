@@ -26,11 +26,12 @@ class StudentController{
             //Check information
             let studentRequest = AppDataSource.getRepository(Student);
             let studentCheck = await studentRequest.findOneBy({studentID: username, studentEmail: email})
-            if (studentCheck.active){
-                return res.status(500).json({ message: "Account's already been activated" })
-            }else if (studentCheck == null){
+            if (studentCheck == null){
                 return res.status(500).json({message: "Username must be your student's id"})
+            } else if (studentCheck.active){
+                return res.status(500).json({ message: "Account's already been activated" })
             }
+            
             //Create OTP and hash OTP, password
             const OTP = otpGenerator.generate(6, { digits: true, upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false});
             const salt = await bcrypt.genSalt(10)
@@ -85,14 +86,39 @@ class StudentController{
             let hashOTP = studentTarget.hashedOTP;
             let result = await bcrypt.compare(OTP, hashOTP);
             if (result){
-                res.status(200).json({ message: 'OTP is valid' })
                 studentTarget.active = true
                 studentRequest.save(studentTarget)
+                res.status(200).json({ message: 'OTP is valid' })
             }else{
                 res.status(402).json({ message: 'OTP is not valid' })
             }
         }catch{
             res.status(500).json({ message: 'OTP is not valid' })
+        }
+    }
+
+    login = async (req,res) => {
+        try {
+            const email = req.body.email;
+            const password = req.body.password;
+            let studentRequest = AppDataSource.getRepository(Student);
+            let studentTarget = await studentRequest.findOneBy({studentEmail: email, active: true})
+            //Account has not been activated
+            if (studentTarget == null){
+                res.status(401).json({message:"Account has not been activated yet. Please register"});
+            }
+
+            let result = await bcrypt.compare(password,studentTarget.studentHashedPassword)
+            if (email === studentTarget.studentEmail &&  result == true){
+                const accessToken = jwt.sign({studentID: studentTarget.studentID}, process.env.STUDENT_ACCESS_TOKEN_SECRET,{ expiresIn: '1h' })
+                const refreshToken = jwt.sign({studentID: studentTarget.studentID}, process.env.STUDENT_REFRESH_TOKEN_SECRET,{ expiresIn: '1y' })
+                res.status(200).json({message:"Login Successfully", refreshToken: refreshToken, accessToken: accessToken});
+            }else {
+                res.status(401).json({message:"Email or password incorrect"});
+            }
+        }catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Internal Server Error" });
         }
     }
 
