@@ -5,7 +5,7 @@ import otpGenerator from "otp-generator";
 import bcrypt from "bcrypt";
 import {Student} from "../models/Student";
 import { AppDataSource } from '../config/db.config';
-
+import JSDatetimeToMySQLDatetime from "../utils/TimeConverter";
 const myOAuth2Client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET
@@ -122,8 +122,15 @@ class StudentController{
         }
     }
 
-    test = (req,res) => {
-        res.json("hello");
+    test = async (req,res) => {
+        let studentRequest = AppDataSource.getRepository(Student);
+        let studentTarget = await studentRequest.findOneBy({studentEmail: "520h0380@student.tdtu.edu.vn"});
+        studentTarget.timeToLiveOTP = JSDatetimeToMySQLDatetime(new Date());
+        console.log("oke")
+        console.log(studentTarget.timeToLiveOTP);
+        console.log("Oke")
+        studentRequest.save(studentTarget);
+        res.json(studentTarget.timeToLiveOTP);
     }
 }
 

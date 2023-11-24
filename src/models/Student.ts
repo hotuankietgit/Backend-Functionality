@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, PrimaryColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, PrimaryColumn, Timestamp } from "typeorm"
 
 @Entity()
 export class Student {
@@ -19,4 +19,7 @@ export class Student {
 
     @Column({default: false})
     active: boolean
+
+    @Column({type: "datetime", nullable: true})
+    timeToLiveOTP: string 
 }
